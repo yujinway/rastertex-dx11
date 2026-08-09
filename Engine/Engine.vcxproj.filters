@@ -24,17 +24,17 @@
     <ClInclude Include="Resource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="RastertexDX11.h">
+    <ClInclude Include="Engine.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="RastertexDX11.cpp">
+    <ClCompile Include="Engine.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="RastertexDX11.rc">
+    <ResourceCompile Include="Engine.rc">
       <Filter>리소스 파일</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -42,7 +42,7 @@
     <Image Include="small.ico">
       <Filter>리소스 파일</Filter>
     </Image>
-    <Image Include="RastertexDX11.ico">
+    <Image Include="Engine.ico">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>
