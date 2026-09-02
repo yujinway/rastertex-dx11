@@ -4,6 +4,7 @@ ModelClass::ModelClass()
 {
     m_vertexBuffer = 0;
     m_indexBuffer = 0;
+    m_Texture = 0;
 }
 
 ModelClass::ModelClass(const ModelClass&)
@@ -14,11 +15,17 @@ ModelClass::~ModelClass()
 {
 }
 
-bool ModelClass::Initialize(ID3D11Device* device)
+bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* textureFilename)
 {
     bool result;
     
     result = InitializeBuffers(device);
+    if (!result)
+    {
+        return false;
+    }
+    
+    result = LoadTexture(device, deviceContext, textureFilename);
     if (!result)
     {
         return false;
@@ -29,6 +36,7 @@ bool ModelClass::Initialize(ID3D11Device* device)
 
 void ModelClass::Shutdown()
 {
+    ReleaseTexture();
     ShutdownBuffers();
     return;
 }
@@ -42,6 +50,11 @@ void ModelClass::Render(ID3D11DeviceContext* deviceContext)
 int ModelClass::GetIndexCount()
 {
     return m_indexCount;
+}
+
+ID3D11ShaderResourceView* ModelClass::GetTexture()
+{
+    return m_Texture->GetTexture();
 }
 
 bool ModelClass::InitializeBuffers(ID3D11Device* device)
@@ -68,13 +81,13 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
     }
     
     vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f); // 좌하단
-    vertices[0].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+    vertices[0].texture = XMFLOAT2(0.0f, 1.0f);
     
     vertices[1].position = XMFLOAT3(0.0f, 1.0f, 0.0f); // 상단 중앙
-    vertices[1].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+    vertices[1].texture = XMFLOAT2(0.5f, 0.0f);
     
     vertices[2].position = XMFLOAT3(1.0f, -1.0f, 0.0f); // 우하단
-    vertices[2].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+    vertices[2].texture = XMFLOAT2(1.0f, 1.0f);
     
     indices[0] = 0; // 좌하단
     indices[1] = 1; // 상단 중앙
@@ -152,5 +165,32 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
     deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
     deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     
+    return;
+}
+
+bool ModelClass::LoadTexture(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* filename)
+{
+    bool result;
+    
+    m_Texture = new TextureClass;
+
+    result = m_Texture->Initialize(device, deviceContext, filename);
+    if (!result)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void ModelClass::ReleaseTexture()
+{
+    if(m_Texture)
+    {
+        m_Texture->Shutdown();
+        delete m_Texture;
+        m_Texture = 0;
+    }
+
     return;
 }
