@@ -8,8 +8,8 @@
 #include <windows.h>
 
 
-#include "inputclass.h"
-#include "applicationclass.h"
+#include "InputClass.h"
+#include "ApplicationClass.h"
 
 
 class SystemClass
