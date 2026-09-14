@@ -23,6 +23,7 @@ ApplicationClass::~ApplicationClass()
 
 bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
+    char modelFilename[128];
     char textureFilename[128];
     bool result;
 
@@ -47,11 +48,14 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
     }
 
     m_Camera->SetPosition(0.0f, 0.0f, -5.0f);
+    
+    strcpy_s(modelFilename, "../data/cube.txt");
 
-    m_Model = new ModelClass;
     strcpy_s(textureFilename, "../data/stone01.tga");
+    
+    m_Model = new ModelClass;
 
-    result = m_Model->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), textureFilename);
+    result = m_Model->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), textureFilename, modelFilename);
     if (!result)
     {
         MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
