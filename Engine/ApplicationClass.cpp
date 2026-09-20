@@ -47,15 +47,16 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
         return false;
     }
 
-    m_Camera->SetPosition(0.0f, 0.0f, -5.0f);
-    
+    m_Camera->SetPosition(0.0f, 0.0f, -10.0f);
+
     strcpy_s(modelFilename, "../data/cube.txt");
 
     strcpy_s(textureFilename, "../data/stone01.tga");
-    
+
     m_Model = new ModelClass;
 
-    result = m_Model->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), textureFilename, modelFilename);
+    result = m_Model->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), textureFilename,
+                                 modelFilename);
     if (!result)
     {
         MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -145,7 +146,7 @@ bool ApplicationClass::Frame()
 
 bool ApplicationClass::Render(float rotation)
 {
-    XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
+    XMMATRIX worldMatrix, viewMatrix, projectionMatrix, rotateMatrix, translateMatrix, scaleMatrix, srMatrix;
     bool result;
 
     m_Direct3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
@@ -155,14 +156,33 @@ bool ApplicationClass::Render(float rotation)
     m_Direct3D->GetWorldMatrix(worldMatrix);
     m_Camera->GetViewMatrix(viewMatrix);
     m_Direct3D->GetProjectionMatrix(projectionMatrix);
-    
-    worldMatrix = XMMatrixRotationY(rotation);
+
+    rotateMatrix = XMMatrixRotationY(rotation);
+    translateMatrix = XMMatrixTranslation(-2.0f, 0.0f, 0.0f);
+    worldMatrix = XMMatrixMultiply(rotateMatrix, translateMatrix);
 
     m_Model->Render(m_Direct3D->GetDeviceContext());
 
     result = m_LightShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix,
                                    projectionMatrix, m_Model->GetTexture(),
                                    m_Light->GetDirection(), m_Light->GetDiffuseColor());
+    if (!result)
+    {
+        return false;
+    }
+
+    scaleMatrix = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+    rotateMatrix = XMMatrixRotationY(rotation);
+    translateMatrix = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
+
+    srMatrix = XMMatrixMultiply(scaleMatrix, rotateMatrix);
+    worldMatrix = XMMatrixMultiply(srMatrix, translateMatrix);
+
+    m_Model->Render(m_Direct3D->GetDeviceContext());
+    result = m_LightShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix,
+                                   projectionMatrix, m_Model->GetTexture(),
+                                   m_Light->GetDirection(), m_Light->GetDiffuseColor());
+    
     if (!result)
     {
         return false;
