@@ -57,13 +57,12 @@ void LightShaderClass::Shutdown()
 
 bool LightShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, XMMATRIX worldMatrix,
                               XMMATRIX viewMatrix, XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture,
-                              XMFLOAT3 lightDirection,
-                              XMFLOAT4 diffuseColor)
+                              XMFLOAT3 lightDirection, XMFLOAT4 ambientColor, XMFLOAT4 diffuseColor)
 {
     bool result;
 
     result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection,
-                                 diffuseColor);
+                                 ambientColor, diffuseColor);
     if (!result)
     {
         return false;
@@ -331,14 +330,14 @@ void LightShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND h
 bool LightShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix,
                                            XMMATRIX viewMatrix, XMMATRIX projectionMatrix,
                                            ID3D11ShaderResourceView* texture, XMFLOAT3 lightDirection,
-                                           XMFLOAT4 diffuseColor)
+                                           XMFLOAT4 ambientColor, XMFLOAT4 diffuseColor)
 {
     HRESULT result;
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     unsigned int bufferNumber;
     MatrixBufferType* dataPtr;
     LightBufferType* dataPtr2;
-    
+
     // 셰이더에 넘기기 위해 행렬을 전치한다.
     worldMatrix = XMMatrixTranspose(worldMatrix);
     viewMatrix = XMMatrixTranspose(viewMatrix);
@@ -382,6 +381,7 @@ bool LightShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, X
     dataPtr2 = (LightBufferType*)mappedResource.pData;
 
     // 조명 변수들을 상수 버퍼에 복사한다.
+    dataPtr2->ambientColor = ambientColor;
     dataPtr2->diffuseColor = diffuseColor;
     dataPtr2->lightDirection = lightDirection;
     dataPtr2->padding = 0.0f;

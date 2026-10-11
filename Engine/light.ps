@@ -4,6 +4,7 @@ SamplerState SampleType : register(s0);
 
 cbuffer LightBuffer
 {
+    float4 ambientColor;
 	float4 diffuseColor;
 	float3 lightDirection;
 	float padding;
@@ -28,14 +29,18 @@ float4 LightPixelShader(PixelInputType input) : SV_TARGET
 	// 이 텍스처 좌표 위치에서 샘플러로 텍스처의 픽셀 색을 샘플링한다.
 	textureColor = shaderTexture.Sample(SampleType, input.tex);
 
+    color = ambientColor;
+
 	// 계산을 위해 빛 방향을 반전한다.
 	lightDir = -lightDirection;
 
 	// 이 픽셀에 닿는 빛의 양을 계산한다.
 	lightIntensity = saturate(dot(input.normal, lightDir));
 
+    color += (diffuseColor * lightIntensity);
+
 	// 디퓨즈 색과 빛의 세기를 결합해 최종 디퓨즈 색의 양을 정한다.
-	color = saturate(diffuseColor * lightIntensity);
+	color = saturate(color);
 
 	// 텍스처 픽셀과 최종 디퓨즈 색을 곱해 최종 픽셀 색 결과를 얻는다.
 	color = color * textureColor;

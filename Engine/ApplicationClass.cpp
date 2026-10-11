@@ -77,8 +77,9 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
         return false;
     }
 
+    m_Light->setAmbientColot(0.15f, 0.15f, 0.15f, 1.0f);
     m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-    m_Light->SetDirection(0.0f, 0.0f, 1.0f);
+    m_Light->SetDirection(1.0f, 0.0f, 0.0f); // 주변광이 큐브에 미치는 영향을 확인할 수 있도록 빛의 방향을 양의 Z축에서 양의 X축으로 변경
 
     return true;
 }
@@ -157,37 +158,17 @@ bool ApplicationClass::Render(float rotation)
     m_Camera->GetViewMatrix(viewMatrix);
     m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
-    rotateMatrix = XMMatrixRotationY(rotation);
-    translateMatrix = XMMatrixTranslation(-2.0f, 0.0f, 0.0f);
-    worldMatrix = XMMatrixMultiply(rotateMatrix, translateMatrix);
+    worldMatrix = XMMatrixRotationY(rotation);
 
     m_Model->Render(m_Direct3D->GetDeviceContext());
 
     result = m_LightShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix,
                                    projectionMatrix, m_Model->GetTexture(),
-                                   m_Light->GetDirection(), m_Light->GetDiffuseColor());
+                                   m_Light->GetDirection(), m_Light->GetAmbientColor(), m_Light->GetDiffuseColor());
     if (!result)
     {
         return false;
     }
-
-    scaleMatrix = XMMatrixScaling(0.5f, 0.5f, 0.5f);
-    rotateMatrix = XMMatrixRotationY(rotation);
-    translateMatrix = XMMatrixTranslation(2.0f, 0.0f, 0.0f);
-
-    srMatrix = XMMatrixMultiply(scaleMatrix, rotateMatrix);
-    worldMatrix = XMMatrixMultiply(srMatrix, translateMatrix);
-
-    m_Model->Render(m_Direct3D->GetDeviceContext());
-    result = m_LightShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix,
-                                   projectionMatrix, m_Model->GetTexture(),
-                                   m_Light->GetDirection(), m_Light->GetDiffuseColor());
-    
-    if (!result)
-    {
-        return false;
-    }
-
     m_Direct3D->EndScene();
 
     return true;
